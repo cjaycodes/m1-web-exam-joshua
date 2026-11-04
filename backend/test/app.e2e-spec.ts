@@ -77,9 +77,17 @@ describe("Bike shop API", () => {
     const all = await request(app.getHttpServer())
       .get("/customers")
       .expect(200);
-    expect(
-      (all.body as CustomerResponseDto[]).map((item) => item.lastName),
-    ).toEqual(["Bernard", "Durand", "Martin", "Moreau"]);
+    const allBody = all.body as {
+      totalCount: number;
+      customers: CustomerResponseDto[];
+    };
+    expect(allBody.totalCount).toBe(4);
+    expect(allBody.customers.map((item) => item.lastName)).toEqual([
+      "Bernard",
+      "Durand",
+      "Martin",
+      "Moreau",
+    ]);
     await request(app.getHttpServer())
       .patch(`/customers/${customer.id}`)
       .send({ city: "Paris", phone: "0600000000" })
@@ -100,6 +108,61 @@ describe("Bike shop API", () => {
     await request(app.getHttpServer())
       .get(`/customers/${customer.id}`)
       .expect(404);
+  });
+
+  it("paginates the customer list with defaults, explicit pages and out-of-range values", async () => {
+    const defaults = await request(app.getHttpServer())
+      .get("/customers")
+      .expect(200);
+    expect(defaults.body).toMatchObject({ totalCount: 3 });
+    expect(
+      (
+        defaults.body as { customers: CustomerResponseDto[] }
+      ).customers.map((item) => item.lastName),
+    ).toEqual(["Bernard", "Durand", "Martin"]);
+
+    const firstPage = await request(app.getHttpServer())
+      .get("/customers")
+      .query({ page: 1, limit: 2 })
+      .expect(200);
+    expect(firstPage.body).toMatchObject({ totalCount: 3 });
+    expect(
+      (
+        firstPage.body as { customers: CustomerResponseDto[] }
+      ).customers.map((item) => item.lastName),
+    ).toEqual(["Bernard", "Durand"]);
+
+    const secondPage = await request(app.getHttpServer())
+      .get("/customers")
+      .query({ page: 2, limit: 2 })
+      .expect(200);
+    expect(secondPage.body).toMatchObject({ totalCount: 3 });
+    expect(
+      (
+        secondPage.body as { customers: CustomerResponseDto[] }
+      ).customers.map((item) => item.lastName),
+    ).toEqual(["Martin"]);
+
+    const beyondLastPage = await request(app.getHttpServer())
+      .get("/customers")
+      .query({ page: 5, limit: 2 })
+      .expect(200);
+    expect(beyondLastPage.body).toEqual({ totalCount: 3, customers: [] });
+
+    for (const query of [
+      { page: 0 },
+      { page: -1 },
+      { page: 1.5 },
+      { page: "abc" },
+      { limit: 0 },
+      { limit: -1 },
+      { limit: 51 },
+      { limit: "abc" },
+    ])
+      await request(app.getHttpServer())
+        .get("/customers")
+        .query(query)
+        .expect(400);
   });
 
   it("enforces email uniqueness on creation and update", async () => {
