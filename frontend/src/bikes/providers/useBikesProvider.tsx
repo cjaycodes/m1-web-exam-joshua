@@ -1,6 +1,10 @@
 import axios from "axios";
 import { useState } from "react";
-import type { BikeModel, PaginatedBikesModel } from "../models/BikeModel";
+import type {
+  BikeModel,
+  CreateBikeModel,
+  PaginatedBikesModel,
+} from "../models/BikeModel";
 
 const PAGE_SIZE = 10;
 
@@ -26,12 +30,19 @@ export const useBikesProvider = () => {
       });
   };
 
-  const deleteBike = (id: string) => {
+  // Returns the request so the caller can react to errors (e.g. bike has sales)
+  const deleteBike = (id: string) =>
     axios.delete(`http://localhost:3000/bikes/${id}`).then(() => {
       // Deleting the last bike of a page: go back to the previous page
       load(bikes.length === 1 && page > 1 ? page - 1 : page);
     });
-  };
+
+  // Returns the request so the caller can react to errors (e.g. invalid input)
+  // The new bike may land on any page, so reload the current one from the backend
+  const createBike = (input: CreateBikeModel) =>
+    axios
+      .post<BikeModel>("http://localhost:3000/bikes", input)
+      .then(() => load());
 
   return {
     bikes,
@@ -41,5 +52,6 @@ export const useBikesProvider = () => {
     load,
     isLoading,
     deleteBike,
+    createBike,
   };
 };

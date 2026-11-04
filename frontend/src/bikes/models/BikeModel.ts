@@ -18,3 +18,8 @@ export type PaginatedBikesModel = {
   totalCount: number;
   bikes: BikeModel[];
 };
+
+export type CreateBikeModel = Omit<BikeModel, "id">;
+
+// Only the fields sent are changed
+export type UpdateBikeModel = Partial<CreateBikeModel>;

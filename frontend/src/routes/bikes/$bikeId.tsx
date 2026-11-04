@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BikeDetailsPage } from "../../bikes/pages/BikeDetailsPage";
 
-// Placeholder so links to /bikes/$bikeId type-check; the details page comes next
 export const Route = createFileRoute("/bikes/$bikeId")({
-  component: () => null,
+  component: RouteComponent,
 });
+
+function RouteComponent() {
+  const { bikeId } = Route.useParams();
+  return <BikeDetailsPage bikeId={bikeId} />;
+}

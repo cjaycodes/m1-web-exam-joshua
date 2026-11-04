@@ -1,12 +1,23 @@
-import { Pagination, Skeleton, Space } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { Button, Pagination, Skeleton, Space } from "antd";
 import Title from "antd/es/typography/Title";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBikesProvider } from "../providers/useBikesProvider";
 import { BikeListItem } from "./BikeListItem";
+import { BikeModal } from "./BikeModal";
 
 export const BikesList = () => {
-  const { bikes, totalCount, page, pageSize, isLoading, load } =
-    useBikesProvider();
+  const {
+    bikes,
+    totalCount,
+    page,
+    pageSize,
+    isLoading,
+    load,
+    deleteBike,
+    createBike,
+  } = useBikesProvider();
+  const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
 
   useEffect(() => {
     load();
@@ -17,10 +28,26 @@ export const BikesList = () => {
       <Title level={2} style={{ margin: 0 }}>
         Bikes
       </Title>
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => setIsCreateOpen(true)}
+      >
+        New bike
+      </Button>
+      {isCreateOpen && (
+        <BikeModal
+          mode="create"
+          onSubmit={createBike}
+          onClose={() => setIsCreateOpen(false)}
+        />
+      )}
       {isLoading ? (
         <Skeleton />
       ) : (
-        bikes.map((bike) => <BikeListItem key={bike.id} bike={bike} />)
+        bikes.map((bike) => (
+          <BikeListItem key={bike.id} bike={bike} deleteBike={deleteBike} />
+        ))
       )}
       <Pagination
         current={page}
