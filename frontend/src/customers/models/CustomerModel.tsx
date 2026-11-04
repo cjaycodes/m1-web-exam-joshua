@@ -11,6 +11,12 @@ export type CustomerModel = {
   country: string | null;
 };
 
+// Shape of GET /customers (paginated)
+export type PaginatedCustomersModel = {
+  totalCount: number;
+  customers: CustomerModel[];
+};
+
 // Only the fields sent are changed; null clears an optional field
 export type UpdateCustomerModel = Partial<Omit<CustomerModel, "id">>;
 

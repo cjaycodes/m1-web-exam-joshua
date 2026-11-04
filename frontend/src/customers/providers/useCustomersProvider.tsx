@@ -3,17 +3,28 @@ import { useState } from "react";
 import type {
   CreateCustomerModel,
   CustomerModel,
+  PaginatedCustomersModel,
 } from "../models/CustomerModel";
+
+const PAGE_SIZE = 10;
 
 export const useCustomersProvider = () => {
   const [customers, setCustomers] = useState<CustomerModel[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const load = () => {
+  const load = (targetPage: number = page) => {
     setIsLoading(true);
     axios
-      .get("http://localhost:3000/customers")
-      .then((result) => setCustomers(result.data))
+      .get<PaginatedCustomersModel>("http://localhost:3000/customers", {
+        params: { page: targetPage, limit: PAGE_SIZE },
+      })
+      .then((result) => {
+        setCustomers(result.data.customers);
+        setTotalCount(result.data.totalCount);
+        setPage(targetPage);
+      })
       .finally(() => {
         setIsLoading(false);
       });
@@ -21,7 +32,8 @@ export const useCustomersProvider = () => {
 
   const deleteCustomer = (id: string) => {
     axios.delete(`http://localhost:3000/customers/${id}`).then(() => {
-      setCustomers((prev) => prev.filter((customer) => customer.id !== id));
+      // Deleting the last customer of a page: go back to the previous page
+      load(customers.length === 1 && page > 1 ? page - 1 : page);
     });
   };
 
@@ -29,16 +41,16 @@ export const useCustomersProvider = () => {
   const createCustomer = (input: CreateCustomerModel) =>
     axios
       .post<CustomerModel>("http://localhost:3000/customers", input)
-      .then((result) => {
-        // Keep the same order as the backend: last name, then first name
-        setCustomers((prev) =>
-          [...prev, result.data].sort(
-            (a, b) =>
-              a.lastName.localeCompare(b.lastName) ||
-              a.firstName.localeCompare(b.firstName),
-          ),
-        );
-      });
+      .then(() => load());
 
-  return { customers, load, isLoading, deleteCustomer, createCustomer };
+  return {
+    customers,
+    totalCount,
+    page,
+    pageSize: PAGE_SIZE,
+    load,
+    isLoading,
+    deleteCustomer,
+    createCustomer,
+  };
 };
