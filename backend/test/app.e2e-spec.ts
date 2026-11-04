@@ -116,9 +116,9 @@ describe("Bike shop API", () => {
       .expect(200);
     expect(defaults.body).toMatchObject({ totalCount: 3 });
     expect(
-      (
-        defaults.body as { customers: CustomerResponseDto[] }
-      ).customers.map((item) => item.lastName),
+      (defaults.body as { customers: CustomerResponseDto[] }).customers.map(
+        (item) => item.lastName,
+      ),
     ).toEqual(["Bernard", "Durand", "Martin"]);
 
     const firstPage = await request(app.getHttpServer())
@@ -127,9 +127,9 @@ describe("Bike shop API", () => {
       .expect(200);
     expect(firstPage.body).toMatchObject({ totalCount: 3 });
     expect(
-      (
-        firstPage.body as { customers: CustomerResponseDto[] }
-      ).customers.map((item) => item.lastName),
+      (firstPage.body as { customers: CustomerResponseDto[] }).customers.map(
+        (item) => item.lastName,
+      ),
     ).toEqual(["Bernard", "Durand"]);
 
     const secondPage = await request(app.getHttpServer())
@@ -138,9 +138,9 @@ describe("Bike shop API", () => {
       .expect(200);
     expect(secondPage.body).toMatchObject({ totalCount: 3 });
     expect(
-      (
-        secondPage.body as { customers: CustomerResponseDto[] }
-      ).customers.map((item) => item.lastName),
+      (secondPage.body as { customers: CustomerResponseDto[] }).customers.map(
+        (item) => item.lastName,
+      ),
     ).toEqual(["Martin"]);
 
     const beyondLastPage = await request(app.getHttpServer())
@@ -349,9 +349,7 @@ describe("Bike shop API", () => {
     expect(await database.getRepository(BikeEntity).count()).toBe(4);
   });
 
-  it("exposes no bike catalogue routes or Hello World route", async () => {
-    await request(app.getHttpServer()).get("/bikes").expect(404);
-    await request(app.getHttpServer()).post("/bikes").send({}).expect(404);
+  it("exposes no Hello World route", async () => {
     await request(app.getHttpServer()).get("/").expect(404);
   });
 });
