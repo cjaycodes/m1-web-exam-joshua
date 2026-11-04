@@ -32,7 +32,7 @@ export const Layout = () => {
           <Col>
             <Title style={{ margin: 0 }}>Bikez.ai</Title>
           </Col>
-          <Col>
+          <Col flex="auto">
             <AppMenu />
           </Col>
         </Row>

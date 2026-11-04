@@ -1,4 +1,8 @@
-import { ContactsOutlined, HomeOutlined } from "@ant-design/icons";
+import {
+  ContactsOutlined,
+  HomeOutlined,
+  ShoppingOutlined,
+} from "@ant-design/icons";
 import { Link, useLocation } from "@tanstack/react-router";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
@@ -18,6 +22,11 @@ const items: MenuItem[] = [
     key: "customers",
     icon: <ContactsOutlined />,
   },
+  {
+    label: <Link to="/bikes">Bikes</Link>,
+    key: "bikes",
+    icon: <ShoppingOutlined />,
+  },
 ];
 
 // The first URL segment tells which section we are in: "/customers/123" → "customers"
@@ -31,7 +40,7 @@ export function AppMenu() {
       selectedKeys={[getSelectedKey(pathname)]}
       mode="horizontal"
       items={items}
-      style={{ backgroundColor: "transparent" }}
+      style={{ backgroundColor: "transparent", flex: 1, minWidth: 0 }}
     />
   );
 }
